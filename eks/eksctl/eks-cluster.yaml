@@ -1,0 +1,150 @@
+kind: ClusterConfig
+metadata:
+  name: dev-app-cluster
+  region: eu-west-1
+  version: '1.24'
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: ebs-volumes
+      namespace: monitoring 
+    attachPolicyARNs:
+    -  arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+vpc: 
+  id: vpc-00995952265a0d8e9 # Provide VPC information
+  subnets:
+    public:
+      public-subnet-eu-west-1a:
+        id: subnet-02c5346c06155d418
+      public-subnet-eu-west-1b:
+        id: subnet-02caf924105cbd7dc
+    private:
+      private-subnet-eu-west-1a:
+        id: subnet-066d9684a299a5f55
+      private-subnet-eu-west-1b:
+        id: subnet-01a57f027db67f4e2
+managedNodeGroups:
+  - name: app-cluster-dev-ng
+    instanceType: t2.medium
+    labels:
+      role: general
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 3
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+        - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        externalDNS: true
+        certManager: true
+        appMesh: true
+        appMeshPreview: true
+        ebs: true
+        fsx: true
+        efs: true
+        awsLoadBalancerController: true
+        xRay: true
+        cloudWatch: true
+    volumeSize: 40
+    ssh:
+      publicKeyName: mb-devops-key
+    subnets:
+      - subnet-01a57f027db67f4e2
+      - subnet-066d9684a299a5f55
+
+
+# nodeGroups:
+#   - name: dev-app-cluster-ng
+#     instanceType: t2.medium
+#     labels:
+#       role: general # set labels so that you can use Node selector or node afinity 
+#     desiredCapacity: 1
+#     privateNetworking: true
+#     volumeSize: 40
+#     ssh:
+#       publicKeyName: mb-devops-key
+#     subnets:
+#       - subnet-01a57f027db67f4e2
+#       - subnet-066d9684a299a5f55
+
+# managedNodeGroups: # Information about managed Node groups https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
+#   - name: managed-dev-app-cluster-ng
+#     instanceType: t3.medium
+#     labels:
+#       role: general
+#     privateNetworking: true
+#     volumeSize: 20
+#     ssh:
+#       publicKeyName: mb-devops-key
+#     subnets:
+#       - subnet-01a57f027db67f4e2
+#       - subnet-066d9684a299a5f55
+#     minSize: 1
+#     maxSize: 3
+#     desiredCapacity: 1
+#   - name: ng-1-workers
+#     labels: { role: workers }
+#     instanceType: m5.xlarge
+#     desiredCapacity: 1
+#     volumeSize: 80
+#     additionalVolumes:
+
+
+# sample config that can be used to add iam policies to code
+
+# nodeGroups:
+#   - name: dev-app-cluster-ng
+#     instanceType: t2.medium
+#     labels:
+#       role: general
+#     desiredCapacity: 1
+#     privateNetworking: true
+#     iam:
+#       attachPolicyARNs:
+#         - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+#         - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+#         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+#         - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+#         - arn:aws:iam::1111111111:policy/kube2iam
+#       withAddonPolicies:
+#         imageBuilder: true
+#         autoScaler: true
+#         externalDNS: true
+#         certManager: true
+#         appMesh: true
+#         appMeshPreview: true
+#         ebs: true
+#         fsx: true
+#         efs: true
+#         awsLoadBalancerController: true
+#         xRay: true
+#         cloudWatch: true
+#     volumeSize: 40
+#     ssh:
+#       publicKeyName: mb-devops-key
+#     subnets:
+#       - subnet-01a57f027db67f4e2
+#       - subnet-066d9684a299a5f55
+
+#  aws eks update-kubeconfig --region us-east-1 --name scaletific-dev-app-cluster 
+#  http://ae38fc1b7025046f9a9bfcbc18bbb22c-1323966404.us-east-1.elb.amazonaws.com/30641
+# argocd login ae38fc1b7025046f9a9bfcbc18bbb22c-1815350428.us-east-1.elb.amazonaws.com
+
+
+# USE TO CREATE SERVICE ACCOUNT TO ENABLE EBS ACCESS
+# eksctl create iamserviceaccount \
+#   --name ebs-csi-controller-sa \
+#   --namespace kube-system \
+#   --cluster my-cluster \
+#   --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
+#   --approve \
+#   --role-only \
+#   --role-name AmazonEKS_EBS_CSI_DriverRole
