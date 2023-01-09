@@ -1,6 +1,0 @@
-controller:
-  replicaCount: 2
-  resources:
-    requests:
-      cpu: 100m
-      memory: 90Mi
