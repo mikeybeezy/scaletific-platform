@@ -42,3 +42,8 @@
 
 ### Command used to spin up Cluster 
 aws eks --region eu-west-2 update-kubeconfig --name eks_prod_cluster --profile default
+
+
+### Useful resources
+
+https://www.youtube.com/watch?v=oYHZ3EPR094
