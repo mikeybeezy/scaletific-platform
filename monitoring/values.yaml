@@ -40,3 +40,5 @@ spec:
   replicas: 1
   retention: 21d
   scrapeInterval: 30s
+---
+
