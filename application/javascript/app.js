@@ -1,0 +1,1 @@
+console.log("some message from java script file")
