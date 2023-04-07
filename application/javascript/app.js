@@ -1,1 +1,1 @@
-console.log("some message from java script file")
+console.log("some message from java script filed")
